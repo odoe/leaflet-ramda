@@ -25,6 +25,7 @@
   "dependencies": {
     "leaflet": "~0.7.3",
     "lodash.debounce": "~2.4.1",
-    "ramda": "~0.8.0"
+    "ramda": "~0.8.0",
+    "esri-leaflet": "~1.0.0-rc.6"
   }
 }
