@@ -1,39 +1,38 @@
 export default L;
 
 import L from 'leaflet';
-import R from 'ramda';
 import debounce from 'lodash.debounce';
 
-var compose = R.compose;
-var curry = R.curry;
-var get = R.get;
-var filter = R.filter;
-var map = R.map;
-var eq = R.eq;
-var take = R.take;
-var last = R.last;
-var sortBy = R.sortBy;
+import {
+  compose,
+  curry,
+  get,
+  filter,
+  map,
+  eq,
+  take,
+  last,
+  sortBy
+} from 'ramda';
 
 var isValid = (a, b) => a.indexOf(b) > -1;
 var getName = get('NAME');
 var getProps = get('properties');
 var getPropName = compose(getName, getProps);
 
-var upper = function(s) {
+var upper = s => {
   return s.toUpperCase();
 };
 
-var filtername = function(name) {
+var filtername = name => {
   return filter(x => eq(upper(getPropName(x)), upper(name)));
 };
-var fuzzyname = function(name) {
+var fuzzyname = name => {
   return filter(x => isValid(upper(getName(x)), upper(name)));
 };
-var getfuzzyname = function(name) {
-  return compose(fuzzyname(name), map(getProps));
-};
+var getfuzzyname = name => compose(fuzzyname(name), map(getProps));
 
-var makeListItem = function(x) {
+var makeListItem = x => {
   var a = L.DomUtil.create('a', 'list-group-item');
   a.href = '';
   a.setAttribute('data-result-name', getName(x));
@@ -54,7 +53,7 @@ L.Control.AutoComplete = L.Control.extend({
 
   layerLoaded: false,
 
-  initialize: function (options) {
+  initialize(options) {
     L.Util.setOptions(this, options);
     if (options.layer) {
       options.layer.on('createfeature', this.featureAdded, this);
@@ -62,7 +61,7 @@ L.Control.AutoComplete = L.Control.extend({
     }
   },
 
-  onAdd: function (m) {
+  onAdd(m) {
     var container = L.DomUtil.create('div', 'auto-complete-container');
     var form = this._form = L.DomUtil.create('form', 'form', container);
     var group = L.DomUtil.create('div', 'form-group', form);
@@ -78,12 +77,12 @@ L.Control.AutoComplete = L.Control.extend({
     return container;
   },
 
-  onRemove: function(m) {
+  onRemove(m) {
     L.DomEvent.removeListener(this._input, 'keyup', this.keyup, this);
     L.DomEvent.removeListener(form, 'submit', this.find, this);
   },
 
-  keydown: function(e) {
+  keydown(e) {
     console.debug('keycode', e);
     switch(e.keyCode) {
       case 38: //up
@@ -99,7 +98,7 @@ L.Control.AutoComplete = L.Control.extend({
     }
   },
 
-  select: function(i) {
+  select(i) {
     this._count = this._count - i;
     if (this._count < 0) this._count = this.resultElems.length - 1;
     if (this._count > this.resultElems.length - 1) this._count = 0;
@@ -116,7 +115,7 @@ L.Control.AutoComplete = L.Control.extend({
     }
   },
 
-  keyup: function(e) {
+  keyup(e) {
     if (e.keyCode === 38 || e.keyCode === 40) {
       this.keydown(e);
     } else {
@@ -133,7 +132,7 @@ L.Control.AutoComplete = L.Control.extend({
     }
   },
 
-  resultSelected: function() {
+  resultSelected() {
     var elem = this._selection;;
     var value = elem.innerHTML;
     this._results.innerHTML = '';
@@ -142,7 +141,7 @@ L.Control.AutoComplete = L.Control.extend({
     this.find();
   },
 
-  itemSelected: function(e) {
+  itemSelected(e) {
     if (e) L.DomEvent.preventDefault(e);
     var elem = e.target;
     var value = elem.innerHTML;
@@ -156,7 +155,7 @@ L.Control.AutoComplete = L.Control.extend({
     this._results.innerHTML = '';
   },
 
-  find: function(e) {
+  find(e) {
     if (e) L.DomEvent.preventDefault(e);
     if (this._selection) {
       this.resultSelected(e);
@@ -169,17 +168,17 @@ L.Control.AutoComplete = L.Control.extend({
     }
   },
 
-  featureAdded: function(e) {
+  featureAdded(e) {
     this.rawdata.push(e.feature);
   },
 
-  layerLoad: function() {
+  layerLoad() {
     console.debug('has layer loaded?');
     this.data = map(x => x, sortBy(getPropName)(this.rawdata));
   }
 });
 
-L.control.autocomplete = function(id, options) {
+L.control.autocomplete = (id, options) => {
   return new L.Control.AutoComplete(id, options);
 };
 
